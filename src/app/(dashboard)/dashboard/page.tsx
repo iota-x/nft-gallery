@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import WalletButton from '@/components/WalletButton'; // Adjust the import path as necessary
+import WalletButton from '@/components/WalletButton';
 
 export default function Dashboard() {
   return (

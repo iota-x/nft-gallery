@@ -4,7 +4,7 @@ import { useWalletContext } from '@/context/WalletContext';
 import useFetchNFTs from '@/app/hooks/useFetchNFTs';
 import { HoverEffect } from '@/components/ui/card-hover-effect';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import LoadingSpinner from '@/components/LoadingSpinner';  // Import the spinner component
+import LoadingSpinner from '@/components/LoadingSpinner'; 
 
 interface Attribute {
   trait_type: string;
@@ -28,7 +28,7 @@ const NftsPage: React.FC = () => {
   const { nfts, loading, error, refetch } = useFetchNFTs(address);
 
   const toggleFavorite = (nftId: string) => {
-    // Implement your logic to favorite/unfavorite an NFT
+    // fav logic
   };
 
   if (!connectedWallet) {

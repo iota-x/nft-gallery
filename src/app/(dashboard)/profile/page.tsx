@@ -39,7 +39,7 @@ const ProfilePage: React.FC = () => {
 
   const handleSelectAccount = (walletName: string, account: string) => {
     try {
-      const accountPublicKey = new PublicKey(account); // Convert string to PublicKey
+      const accountPublicKey = new PublicKey(account);
       selectAccount(walletName, accountPublicKey);
     } catch (err) {
       setError(`Failed to select account: ${err instanceof Error ? err.message : 'An unknown error occurred'}`);

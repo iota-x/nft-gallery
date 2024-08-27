@@ -15,7 +15,7 @@ export interface UseWalletResult {
   selectAccount: (walletName: string, account: PublicKey) => void;
 }
 
-const LOCAL_STORAGE_KEY = 'wallet_connection'; // Key for localStorage
+const LOCAL_STORAGE_KEY = process.env.NEXT_PUBLIC_LOCAL_STORAGE_KEY || 'wallet_connection';
 
 export const useWallet = (): UseWalletResult => {
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -44,15 +44,16 @@ export const useWallet = (): UseWalletResult => {
 
       setWallets(walletsDetected);
 
-      // Load wallet connection state from localStorage
       const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedState) {
         const { name, publicKey, isConnected, accounts } = JSON.parse(savedState);
-        setWallets(prev => prev.map(wallet => 
-          wallet.name === name 
-            ? { ...wallet, publicKey: new PublicKey(publicKey), isConnected, accounts: accounts.map((acc: string) => new PublicKey(acc)) }
-            : wallet
-        ));
+        setWallets(prev =>
+          prev.map(wallet =>
+            wallet.name === name
+              ? { ...wallet, publicKey: new PublicKey(publicKey), isConnected, accounts: accounts.map((acc: string) => new PublicKey(acc)) }
+              : wallet
+          )
+        );
       }
     };
 
@@ -66,9 +67,9 @@ export const useWallet = (): UseWalletResult => {
         walletProvider = window.solana;
         const response = await walletProvider.connect();
         const publicKey = response.publicKey.toString();
-        const updatedWallet = { name: 'Phantom', publicKey, isConnected: true, accounts: [publicKey] };
+        const updatedWallet = { name: 'Phantom', publicKey: new PublicKey(publicKey), isConnected: true, accounts: [new PublicKey(publicKey)] };
         setWallets(prev =>
-          prev.map(wallet => 
+          prev.map(wallet =>
             wallet.name === 'Phantom'
               ? updatedWallet
               : wallet
@@ -79,9 +80,9 @@ export const useWallet = (): UseWalletResult => {
         walletProvider = window.backpack;
         const response = await walletProvider.connect();
         const publicKey = response.publicKey.toString();
-        const updatedWallet = { name: 'Backpack', publicKey, isConnected: true, accounts: [publicKey] };
+        const updatedWallet = { name: 'Backpack', publicKey: new PublicKey(publicKey), isConnected: true, accounts: [new PublicKey(publicKey)] };
         setWallets(prev =>
-          prev.map(wallet => 
+          prev.map(wallet =>
             wallet.name === 'Backpack'
               ? updatedWallet
               : wallet
@@ -102,7 +103,7 @@ export const useWallet = (): UseWalletResult => {
           : wallet
       )
     );
-    localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear localStorage on disconnect
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
 
   const selectAccount = (walletName: string, account: PublicKey) => {
@@ -111,7 +112,6 @@ export const useWallet = (): UseWalletResult => {
         wallet.name === walletName ? { ...wallet, publicKey: account } : wallet
       )
     );
-    // Update localStorage with selected account
     const updatedWallet = wallets.find(wallet => wallet.name === walletName);
     if (updatedWallet) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWallet));

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Define interfaces for the NFT structure
 interface NFT {
   id: string;
   title: string;
@@ -34,7 +33,6 @@ type Data = {
   error?: string;
 };
 
-// Helper function to call the Helius API and filter only non-fungible tokens (NFTs)
 async function fetchNonFungibleAssetsByOwner(address: string, page: number = 1, limit: number = 1000) {
   const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
   const url = `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;
@@ -60,7 +58,7 @@ async function fetchNonFungibleAssetsByOwner(address: string, page: number = 1, 
   });
 
   if (!response.ok) {
-    const errorText = await response.text(); // Get the response text for debugging
+    const errorText = await response.text(); 
     throw new Error(`Error fetching NFTs from Helius: ${errorText}`);
   }
 
