@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useParams } from "next/navigation";
+import { Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export interface NFT {
   id: string;
@@ -65,11 +68,11 @@ const NFTDetailPage = () => {
         if (data.success) {
           setNFT(data.nft);
         } else {
-          setError(data.message || 'Failed to fetch NFT data.');
+          setError(data.message || "Failed to fetch NFT data.");
         }
       } catch (err) {
-        console.error('Error fetching NFT:', err);
-        setError('An error occurred while fetching the NFT.');
+        console.error("Error fetching NFT:", err);
+        setError("An error occurred while fetching the NFT.");
       } finally {
         setLoading(false);
       }
@@ -86,17 +89,13 @@ const NFTDetailPage = () => {
       setLoading(true);
       throttledFetchNFT(id);
     } else {
-      setError('No NFT ID provided.');
+      setError("No NFT ID provided.");
       setLoading(false);
     }
   }, [id, debouncedFetchNFT, throttledFetchNFT]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-xl font-semibold">Loading...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -110,105 +109,97 @@ const NFTDetailPage = () => {
   if (!nft) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-xl">No NFT found.</p>
+        <p className="text-xl text-white">No NFT found.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">{nft.title}</h1>
-      <div className="flex flex-col md:flex-row">
-        <img
-          src={nft.imageUrl}
-          alt={nft.title}
-          className="w-full md:w-1/2 rounded-lg shadow-lg mb-4 md:mb-0 md:mr-4"
-        />
-        <div className="md:w-1/2">
-          <p className="text-gray-700 mb-4">{nft.description}</p>
+    <div className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8 text-white pt-20">
+      {/* Responsive Layout Container */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
+        {/* Image Section */}
+        <div className="flex justify-center md:justify-start">
+          {nft.imageUrl && (
+            <img
+              src={nft.imageUrl}
+              alt={nft.title}
+              className="w-full h-auto rounded-lg shadow-lg object-cover"
+            />
+          )}
+        </div>
 
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">Attributes</h2>
+        {/* Details Section */}
+        <div>
+          <Card className="mb-4">
+            <CardTitle>{nft.title}</CardTitle>
+            <CardDescription>{nft.description}</CardDescription>
+
+            {/* Attributes Section */}
+            <CardTitle className="mt-6">Attributes</CardTitle>
             {nft.attributes.length > 0 ? (
-              <ul className="list-disc list-inside">
+              <ul className="list-disc list-inside pl-5">
                 {nft.attributes.map((attr, index) => (
-                  <li key={index}>
+                  <li key={index} className="text-zinc-100">
                     <span className="font-medium">{attr.trait_type}:</span> {attr.value}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No attributes available.</p>
+              <CardDescription>No attributes available.</CardDescription>
             )}
-          </div>
 
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">Collection</h2>
-            <p>
-              <span className="font-medium">Name:</span> {nft.collection.name}
-            </p>
-            <p>
-              <span className="font-medium">Address:</span> {nft.collection.address}
-            </p>
-          </div>
+            {/* Collection Information */}
+            <CardTitle className="mt-6">Collection</CardTitle>
+            <CardDescription>
+              <span className="font-medium text-zinc-100">Name:</span> {nft.collection.name}
+              <br />
+              <span className="font-medium text-zinc-100">Address:</span> {nft.collection.address}
+            </CardDescription>
 
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">Royalty Information</h2>
-            <p>
-              <span className="font-medium">Model:</span> {nft.royalty.model}
-            </p>
-            <p>
-              <span className="font-medium">Percent:</span> {nft.royalty.percent}%
-            </p>
-            <p>
-              <span className="font-medium">Primary Sale Happened:</span> {nft.royalty.primarySaleHappened ? 'Yes' : 'No'}
-            </p>
-            <p>
-              <span className="font-medium">Locked:</span> {nft.royalty.locked ? 'Yes' : 'No'}
-            </p>
-          </div>
+            {/* Royalty Information */}
+            <CardTitle className="mt-6">Royalty Information</CardTitle>
+            <CardDescription>
+              <span className="font-medium text-zinc-100">Model:</span> {nft.royalty.model}
+              <br />
+              <span className="font-medium text-zinc-100">Percent:</span> {nft.royalty.percent}%
+              <br />
+              <span className="font-medium text-zinc-100">Primary Sale Happened:</span> {nft.royalty.primarySaleHappened ? "Yes" : "No"}
+              <br />
+              <span className="font-medium text-zinc-100">Locked:</span> {nft.royalty.locked ? "Yes" : "No"}
+            </CardDescription>
 
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">Ownership</h2>
-            <p>
-              <span className="font-medium">Owner Address:</span> {nft.owner}
-            </p>
-            <p>
-              <span className="font-medium">Mutable:</span> {nft.mutable ? 'Yes' : 'No'}
-            </p>
-            <p>
-              <span className="font-medium">Burnt:</span> {nft.burnt ? 'Yes' : 'No'}
-            </p>
-          </div>
+            {/* Ownership Information */}
+            <CardTitle className="mt-6">Ownership</CardTitle>
+            <CardDescription>
+              <span className="font-medium text-zinc-100">Owner Address:</span> {nft.owner}
+              <br />
+              <span className="font-medium text-zinc-100">Mutable:</span> {nft.mutable ? "Yes" : "No"}
+              <br />
+              <span className="font-medium text-zinc-100">Burnt:</span> {nft.burnt ? "Yes" : "No"}
+            </CardDescription>
 
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2">Additional Information</h2>
-            <p>
-              <span className="font-medium">Symbol:</span> {nft.symbol}
-            </p>
-            <p>
-              <span className="font-medium">Token Standard:</span> {nft.tokenStandard}
-            </p>
-            <p>
-              <span className="font-medium">Compression Eligible:</span> {nft.compression.eligible ? 'Yes' : 'No'}
-            </p>
-            <p>
-              <span className="font-medium">Compressed:</span> {nft.compression.compressed ? 'Yes' : 'No'}
-            </p>
-            {nft.externalUrl && (
-              <p>
-                <span className="font-medium">External URL:</span> 
-                <a
-                  href={nft.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {nft.externalUrl}
-                </a>
-              </p>
-            )}
-          </div>
+            {/* Additional Information */}
+            <CardTitle className="mt-6">Additional Information</CardTitle>
+            <CardDescription>
+              <span className="font-medium text-zinc-100">Symbol:</span> {nft.symbol}
+              <br />
+              <span className="font-medium text-zinc-100">Token Standard:</span> {nft.tokenStandard}
+              <br />
+              <span className="font-medium text-zinc-100">Compression Eligible:</span> {nft.compression.eligible ? "Yes" : "No"}
+              <br />
+              <span className="font-medium text-zinc-100">Compressed:</span> {nft.compression.compressed ? "Yes" : "No"}
+              {nft.externalUrl && (
+                <>
+                  <br />
+                  <span className="font-medium text-zinc-100">External URL:</span>{" "}
+                  <a href={nft.externalUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                    {nft.externalUrl}
+                  </a>
+                </>
+              )}
+            </CardDescription>
+          </Card>
         </div>
       </div>
     </div>

@@ -1,13 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
 import WalletButton from '@/components/WalletButton';
+import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-900 text-white">
-      <div className="w-full max-w-4xl bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold mb-4 md:mb-0">Welcome to Your NFT Dashboard</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-20">
+      <div className="w-full max-w-7xl bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="flex flex-col md:flex-row justify-center items-center mb-6">
+          <h1 className="text-5xl font-bold text-center md:text-left mb-4 md:mb-0 p-8">Welcome to Your NFT Dashboard</h1>
+        </div>
+        <div className='w-full mx-auto mb-8 p-0'>
           <WalletButton />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

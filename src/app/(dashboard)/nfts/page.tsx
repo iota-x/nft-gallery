@@ -3,7 +3,6 @@ import React from 'react';
 import { useWalletContext } from '@/context/WalletContext';
 import useFetchNFTs from '@/app/hooks/useFetchNFTs';
 import { HoverEffect } from '@/components/ui/card-hover-effect';
-import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import LoadingSpinner from '@/components/LoadingSpinner'; 
 
 interface Attribute {
@@ -27,10 +26,6 @@ const NftsPage: React.FC = () => {
 
   const { nfts, loading, error, refetch } = useFetchNFTs(address);
 
-  const toggleFavorite = (nftId: string) => {
-    // fav logic
-  };
-
   if (!connectedWallet) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -42,7 +37,7 @@ const NftsPage: React.FC = () => {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-gray-900 to-black pt-[140px]">
       <h1 className="text-3xl font-bold mb-6 text-white">Your NFTs</h1>
-      {loading && <LoadingSpinner />}  {/* Use the loading spinner here */}
+      {loading && <LoadingSpinner />} 
       {error && <p className="text-red-500">{error}</p>}
       {nfts.length > 0 ? (
         <HoverEffect

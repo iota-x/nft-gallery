@@ -1,8 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/NavBar';
-import { WalletProvider } from '@/context/WalletContext'; // Import WalletProvider
+import Providers from '@/app/Providers';
+import { ChakraProvider } from '@chakra-ui/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,13 +22,15 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={inter.className}>
       <Navbar />
-        <WalletProvider> {/* Wrap with WalletProvider */}
-          <div className="flex flex-col min-h-screen"> {/* Flex container to ensure full height */}
-            <main className="flex-grow"> {/* Flex grow to take remaining space */}
-              {children}
-            </main>
-          </div>
-        </WalletProvider>
+        <ChakraProvider>
+          <Providers>
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-grow">
+                {children}
+              </main>
+            </div>
+          </Providers>
+        </ChakraProvider>
       </body>
     </html>
   );

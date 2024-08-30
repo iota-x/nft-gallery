@@ -1,122 +1,123 @@
-import { useState, useEffect } from 'react';
+"use client";
+import { useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { walletsState, selectedWalletState, selectedAccountState, walletErrorState, isLoadingState, Wallet } from '@/app/state/walletState';
 
-export interface Wallet {
-  name: string;
-  publicKey: PublicKey | null;
-  isConnected: boolean;
-  accounts: PublicKey[];
-}
-
-export interface UseWalletResult {
-  wallets: Wallet[];
-  connectWallet: (walletName: string) => Promise<void>;
-  disconnectWallet: (walletName: string) => void;
-  selectAccount: (walletName: string, account: PublicKey) => void;
-}
-
-const LOCAL_STORAGE_KEY = process.env.NEXT_PUBLIC_LOCAL_STORAGE_KEY || 'wallet_connection';
-
-export const useWallet = (): UseWalletResult => {
-  const [wallets, setWallets] = useState<Wallet[]>([]);
+export const useWallet = () => {
+  const [wallets, setWallets] = useRecoilState(walletsState);
+  const setSelectedWallet = useSetRecoilState(selectedWalletState);
+  const setSelectedAccount = useSetRecoilState(selectedAccountState);
+  const setError = useSetRecoilState(walletErrorState);
+  const setLoading = useSetRecoilState(isLoadingState);
 
   useEffect(() => {
-    const detectWallets = () => {
-      const walletsDetected: Wallet[] = [];
+    if (typeof window === "undefined") return;
 
-      if ('solana' in window && window.solana.isPhantom) {
-        walletsDetected.push({
-          name: 'Phantom',
-          publicKey: null,
-          isConnected: false,
-          accounts: [],
-        });
+    // Load wallet state from local storage
+    const savedWallets = localStorage.getItem('wallets');
+    if (savedWallets) {
+      const parsedWallets = JSON.parse(savedWallets);
+      setWallets(parsedWallets);
+
+      // Set selected wallet and account based on saved state
+      const connectedWallet = parsedWallets.find((wallet: Wallet) => wallet.isConnected);
+      if (connectedWallet) {
+        setSelectedWallet(connectedWallet.name);
+        setSelectedAccount(connectedWallet.publicKey ? new PublicKey(connectedWallet.publicKey) : null);
       }
+    }
 
-      if ('backpack' in window && window.backpack.isBackpack) {
-        walletsDetected.push({
-          name: 'Backpack',
-          publicKey: null,
-          isConnected: false,
-          accounts: [],
-        });
-      }
-
-      setWallets(walletsDetected);
-
-      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedState) {
-        const { name, publicKey, isConnected, accounts } = JSON.parse(savedState);
-        setWallets(prev =>
-          prev.map(wallet =>
-            wallet.name === name
-              ? { ...wallet, publicKey: new PublicKey(publicKey), isConnected, accounts: accounts.map((acc: string) => new PublicKey(acc)) }
-              : wallet
-          )
-        );
+    // Synchronize state across tabs
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'wallets') {
+        const updatedWallets = event.newValue ? JSON.parse(event.newValue) : [];
+        setWallets(updatedWallets);
+        const connectedWallet = updatedWallets.find((wallet: Wallet) => wallet.isConnected);
+        if (connectedWallet) {
+          setSelectedWallet(connectedWallet.name);
+          setSelectedAccount(connectedWallet.publicKey ? new PublicKey(connectedWallet.publicKey) : null);
+        } else {
+          setSelectedWallet(null);
+          setSelectedAccount(null);
+        }
       }
     };
 
-    detectWallets();
-  }, []);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [setWallets, setSelectedWallet, setSelectedAccount]);
 
   const connectWallet = async (walletName: string) => {
+    setLoading(true);
     try {
-      let walletProvider;
+      let walletProvider: any;
       if (walletName === 'Phantom') {
         walletProvider = window.solana;
         const response = await walletProvider.connect();
-        const publicKey = response.publicKey.toString();
-        const updatedWallet = { name: 'Phantom', publicKey: new PublicKey(publicKey), isConnected: true, accounts: [new PublicKey(publicKey)] };
-        setWallets(prev =>
-          prev.map(wallet =>
-            wallet.name === 'Phantom'
-              ? updatedWallet
-              : wallet
-          )
-        );
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWallet));
+        const publicKey = new PublicKey(response.publicKey.toString());
+        updateWallet(walletName, publicKey);
       } else if (walletName === 'Backpack') {
         walletProvider = window.backpack;
         const response = await walletProvider.connect();
-        const publicKey = response.publicKey.toString();
-        const updatedWallet = { name: 'Backpack', publicKey: new PublicKey(publicKey), isConnected: true, accounts: [new PublicKey(publicKey)] };
-        setWallets(prev =>
-          prev.map(wallet =>
-            wallet.name === 'Backpack'
-              ? updatedWallet
-              : wallet
-          )
-        );
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWallet));
+        const publicKey = new PublicKey(response.publicKey.toString());
+        updateWallet(walletName, publicKey);
       }
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      setError(`Failed to connect to ${walletName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const disconnectWallet = (walletName: string) => {
-    setWallets(prev =>
-      prev.map(wallet =>
-        wallet.name === walletName
-          ? { ...wallet, publicKey: null, isConnected: false, accounts: [] }
-          : wallet
-      )
+    const updatedWallets = wallets.map(wallet =>
+      wallet.name === walletName
+        ? { ...wallet, publicKey: null, isConnected: false, accounts: [] }
+        : wallet
     );
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    setWallets(updatedWallets);
+    localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+    setSelectedWallet(null);
+    setSelectedAccount(null);
   };
 
   const selectAccount = (walletName: string, account: PublicKey) => {
-    setWallets(prev =>
-      prev.map(wallet =>
-        wallet.name === walletName ? { ...wallet, publicKey: account } : wallet
-      )
+    const updatedWallets = wallets.map(wallet =>
+      wallet.name === walletName ? { ...wallet, publicKey: account } : wallet
     );
-    const updatedWallet = wallets.find(wallet => wallet.name === walletName);
-    if (updatedWallet) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWallet));
+    setWallets(updatedWallets);
+    localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+    setSelectedAccount(account);
+  };
+
+  const updateWallet = (walletName: string, publicKey: PublicKey) => {
+    const updatedWallet: Wallet = {
+      name: walletName,
+      publicKey,
+      isConnected: true,
+      accounts: [publicKey],
+    };
+    const updatedWallets = wallets.map(wallet =>
+      wallet.name === walletName ? updatedWallet : wallet
+    );
+    setWallets(updatedWallets);
+    localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+    setSelectedWallet(walletName);
+    setSelectedAccount(publicKey);
+  };
+
+  const setManualWallet = (address: string) => {
+    try {
+      const publicKey = new PublicKey(address);
+      updateWallet('ManualWallet', publicKey);
+    } catch (error) {
+      setError(`Invalid manual wallet address: ${address}`);
     }
   };
 
-  return { wallets, connectWallet, disconnectWallet, selectAccount };
+  return { wallets, connectWallet, disconnectWallet, selectAccount, setManualWallet };
 };
