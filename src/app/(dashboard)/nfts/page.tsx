@@ -1,9 +1,9 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWalletContext } from '@/context/WalletContext';
 import useFetchNFTs from '@/app/hooks/useFetchNFTs';
 import { HoverEffect } from '@/components/ui/card-hover-effect';
-import LoadingSpinner from '@/components/LoadingSpinner'; 
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface Attribute {
   trait_type: string;
@@ -21,23 +21,38 @@ interface NFT {
 
 const NftsPage: React.FC = () => {
   const { wallets } = useWalletContext();
+  const [manualAddress, setManualAddress] = useState<string | null>(null);
+
+  // Fetch manual wallet address from local storage
+  useEffect(() => {
+    const storedAddress = localStorage.getItem('manualWalletAddress');
+    if (storedAddress) {
+      setManualAddress(storedAddress);
+    }
+  }, []);
+
+  // Find the connected wallet or use manual address if available
   const connectedWallet = wallets.find(wallet => wallet.isConnected);
-  const address = connectedWallet?.publicKey?.toString() || '';
+  const address = connectedWallet?.publicKey?.toString() || manualAddress || '';
 
-  const { nfts, loading, error, refetch } = useFetchNFTs(address);
+  // Add a check here to prevent API call if the address is invalid
+  const shouldFetchNFTs = address && address !== 'null';
 
-  if (!connectedWallet) {
+  const { nfts, loading, error, refetch } = useFetchNFTs(shouldFetchNFTs ? address : '');
+
+  // Display message if address is invalid
+  if (!shouldFetchNFTs) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Please connect your wallet to see your NFTs.</p>
+        <p>Please connect your wallet or enter a manual wallet address to see your NFTs.</p>
       </div>
     );
   }
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-gray-900 to-black pt-[140px]">
-      <h1 className="text-3xl font-bold mb-6 text-white">Your NFTs</h1>
-      {loading && <LoadingSpinner />} 
+      <h1 className="text-5xl font-bold mb-7 text-white">NFTs owned by the connected address</h1>
+      {loading && <LoadingSpinner />}
       {error && <p className="text-red-500">{error}</p>}
       {nfts.length > 0 ? (
         <HoverEffect

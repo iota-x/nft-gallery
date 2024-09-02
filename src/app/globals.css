@@ -71,3 +71,13 @@ button:disabled {
   color: red;
   margin-top: 10px;
 }
+
+html, body {
+  background-color: #000; /* Set background color to black */
+  color: #fff; /* Optional: Set default text color to white for better contrast */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden; /* Optional: Prevent horizontal scroll */
+}

@@ -17,9 +17,13 @@ export default function Navbar({ className }: { className?: string }) {
                 <Link href={"/dashboard"}>
                     <MenuItem setActive={setActive} active={active} item="Dashboard"></MenuItem>
                 </Link>
-                <Link href={"/contact"}>
-                    <MenuItem setActive={setActive} active={active} item="Contact Us"></MenuItem>
-                </Link>
+                <MenuItem setActive={setActive} active={active} item="NFTs">
+                
+                <div className="flex flex-col space-y-4 text-sm">
+                    <HoveredLink href="/nfts">Owned NFTs</HoveredLink>
+                    <HoveredLink href="/viewNFT">Browse NFT</HoveredLink>
+                </div>
+                </MenuItem>
             </Menu>
         </div>
     )

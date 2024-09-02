@@ -2,15 +2,22 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useWallet } from '@/app/hooks/useWallet';
+import { useManualWallet } from '@/app/hooks/useManualWallet'; // Import the new hook
 import { Wallet, walletErrorState, isLoadingState } from '@/app/state/walletState';
-import { PublicKey } from '@solana/web3.js'; // Import PublicKey
+import { PublicKey } from '@solana/web3.js';
 
 interface WalletContextProps {
   wallets: Wallet[];
   connectWallet: (walletName: string) => Promise<void>;
   disconnectWallet: (walletName: string) => void;
-  selectAccount: (walletName: string, account: PublicKey) => void; // Updated type
-  setManualWallet: (address: string) => void;
+  selectAccount: (walletName: string, account: PublicKey) => void;
+  manualWalletData: {
+    address: string | null;
+    error: string | null;
+    handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    addManualWallet: (address: string) => void;
+    disconnectManualWallet: () => void;
+  };
   error: string | null;
   loading: boolean;
 }
@@ -18,7 +25,14 @@ interface WalletContextProps {
 const WalletContext = createContext<WalletContextProps | undefined>(undefined);
 
 export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { wallets, connectWallet, disconnectWallet, selectAccount, setManualWallet } = useWallet();
+  const { wallets, connectWallet, disconnectWallet, selectAccount } = useWallet();
+  const {
+    manualAddress,
+    manualWalletError,
+    handleManualAddressChange,
+    addManualWallet,
+    disconnectManualWallet
+  } = useManualWallet();
 
   const error = useRecoilValue(walletErrorState);
   const loading = useRecoilValue(isLoadingState);
@@ -30,7 +44,13 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         connectWallet,
         disconnectWallet,
         selectAccount,
-        setManualWallet,
+        manualWalletData: {
+          address: manualAddress,
+          error: manualWalletError,
+          handleAddressChange: handleManualAddressChange,
+          addManualWallet,
+          disconnectManualWallet
+        },
         error,
         loading,
       }}

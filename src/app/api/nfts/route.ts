@@ -51,25 +51,29 @@ async function fetchNonFungibleAssetsByOwner(address: string, page: number = 1, 
         page: page,
         limit: limit,
         displayOptions: {
-          showFungible: false
-        }
-      }
-    })
+          showFungible: false,
+        },
+      },
+    }),
   });
 
   if (!response.ok) {
-    const errorText = await response.text(); 
+    const errorText = await response.text();
     throw new Error(`Error fetching NFTs from Helius: ${errorText}`);
   }
 
-  return await response.json() as HeliusNFTResponse;
+  return (await response.json()) as HeliusNFTResponse;
 }
 
 export async function GET(req: NextRequest) {
   const address = req.nextUrl.searchParams.get('address');
 
-  if (!address || typeof address !== 'string') {
-    return NextResponse.json({ success: false, message: 'Wallet address is required and must be a string' }, { status: 400 });
+  // Check if the address is literally the string "null" or is null/empty
+  if (!address || address.trim() === '' || address === 'null') {
+    return NextResponse.json(
+      { success: false, message: 'Wallet address is required and must be a valid string' },
+      { status: 400 }
+    );
   }
 
   try {
