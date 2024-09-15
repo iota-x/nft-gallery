@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
+import Image from 'next/image';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { motion } from "framer-motion";
@@ -33,6 +34,11 @@ export interface NFT {
     compressed: boolean;
   };
 }
+
+// Custom image loader function
+const customLoader = ({ src }: { src: string }) => {
+  return src; // Modify as needed for your external source
+};
 
 const debounce = (func: Function, wait: number) => {
   let timeout: NodeJS.Timeout;
@@ -135,9 +141,12 @@ const NFTDetailPage = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               {nft.imageUrl && (
-                <img
+                <Image
+                  loader={customLoader}
                   src={nft.imageUrl}
                   alt={nft.title}
+                  width={500}  // You can adjust width and height based on your design
+                  height={500}
                   className="w-full h-auto rounded-lg shadow-lg object-cover"
                 />
               )}

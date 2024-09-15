@@ -2,6 +2,11 @@ import { cn } from "@/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
+import Image from 'next/image';
+
+const customLoader = ({ src }: { src: string }) => {
+  return src; // Return the full URL to allow loading external images
+};
 
 export const HoverEffect = ({
   items,
@@ -51,9 +56,12 @@ export const HoverEffect = ({
           </AnimatePresence>
           <Card>
             {item.imageUrl && (
-              <img
+              <Image
+                loader={customLoader} // Use custom loader for dynamic images
                 src={item.imageUrl}
                 alt={item.title}
+                width={500} // Adjust width and height as per your layout
+                height={500}
                 className="w-full h-auto rounded-lg shadow-lg"
               />
             )}
@@ -65,6 +73,7 @@ export const HoverEffect = ({
     </div>
   );
 };
+
 
 export const Card = ({
   className,

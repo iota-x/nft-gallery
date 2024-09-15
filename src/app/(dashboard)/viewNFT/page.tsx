@@ -6,6 +6,12 @@ import { Card, CardTitle, CardDescription } from '@/components/ui/card-hover-eff
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Button, Input, Box, Text, VStack } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
+import Image from 'next/image';
+
+// Custom loader function for optimized image loading
+const customLoader = ({ src, width, quality }: { src: string, width: number, quality?: number }) => {
+  return `${src}?w=${width}&q=${quality || 75}`;
+};
 
 export interface NFT {
   id: string;
@@ -123,10 +129,13 @@ const SearchNFTPage = () => {
           {/* Image Section */}
           <div className="flex justify-center md:justify-start">
             {nft.imageUrl && (
-              <img
+              <Image
+                loader={customLoader} // Apply custom loader
                 src={nft.imageUrl}
                 alt={nft.title}
-                className="w-full h-auto rounded-lg shadow-lg object-cover"
+                width={500} // Define width
+                height={500} // Define height
+                className="rounded-lg shadow-lg object-cover"
               />
             )}
           </div>

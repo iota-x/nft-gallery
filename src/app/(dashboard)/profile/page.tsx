@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useWalletContext } from '@/context/WalletContext'; // Import the context hook
+import { useWalletContext } from '@/context/WalletContext'; 
 import Button from '@/components/Button';
-import { PublicKey } from '@solana/web3.js'; // Import PublicKey
+import { PublicKey } from '@solana/web3.js';
 
 const ProfilePage: React.FC = () => {
-  const { wallets, connectWallet, disconnectWallet, selectAccount } = useWalletContext(); // Use context hook
+  const { wallets, connectWallet, disconnectWallet, selectAccount } = useWalletContext(); 
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

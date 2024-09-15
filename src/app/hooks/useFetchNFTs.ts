@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface NFT {
   id: string;
@@ -14,9 +14,7 @@ const useFetchNFTs = (address: string) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addressRef = useState<string | null>(address)[0];
-
-  const fetchNFTs = async () => {
+  const fetchNFTs = useCallback(async () => {
     if (!address) return;
 
     setLoading(true);
@@ -37,7 +35,7 @@ const useFetchNFTs = (address: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [address]);
 
   useEffect(() => {
     const cachedNFTs = localStorage.getItem(`nfts_${address}`);
@@ -46,7 +44,7 @@ const useFetchNFTs = (address: string) => {
     } else {
       fetchNFTs();
     }
-  }, [address]);
+  }, [address, fetchNFTs]);
 
   return { nfts, loading, error, refetch: fetchNFTs };
 };
